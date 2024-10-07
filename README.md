@@ -22,7 +22,7 @@ The datasets are available at the following links:
 
 ## Statistics
 
-To extract the statitics of each model, move their root directory and run the following command:
+To extract the statitics of the models, move to their root directory and run the following command:
 
 ```sh
 python3 exctract_csv.py --directory forecasting/B<batch_size>_E<repr_dim>/ [--type raw]
