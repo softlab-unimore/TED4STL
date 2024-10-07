@@ -29,6 +29,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='ETTh1', help='The dataset name')
     parser.add_argument('--run_name', default='forecast_multivar', help='The folder name used to save model, output and evaluation metrics. This can be set to any word')
+    parser.add_argument('--mode', type=str, default='dlinear', help='The mode used for training')
     parser.add_argument('--archive', type=str, required=True, help='The archive name that the dataset belongs to. This can be set to forecast_csv, or forecast_csv_univar')
     parser.add_argument('--gpu', type=int, default=0, help='The gpu no. used for training and inference (defaults to 0)')
     parser.add_argument('--batch-size', type=int, default=128, help='The batch size (defaults to 8)')
