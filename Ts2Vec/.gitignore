@@ -1,0 +1,12 @@
+/datasets/*[!.py]
+.ipynb_checkpoints
+__pycache__
+training/*
+scripts/_nohup
+.rsync-filter
+.idea
+config_forecasting.ini
+config_anomaly_detection.ini
+config_classification.ini
+venv
+
