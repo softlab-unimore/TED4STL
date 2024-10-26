@@ -179,7 +179,7 @@ class ViT_Forecasting(torch.nn.Module):
         patches_err = rearrange(patches_err, 'b c h w -> (h w) b c')
         patches_avg = patches_avg + self.pos_embedding_avg
         patches_err = patches_err + self.pos_embedding_err
-        patches_avg = torch.cat([self.cls_token_avg.expand(-1, patches_avg.shape[1], -1), patches_err], dim=0)
+        patches_avg = torch.cat([self.cls_token_avg.expand(-1, patches_avg.shape[1], -1), patches_avg], dim=0)
         patches_err = torch.cat([self.cls_token_err.expand(-1, patches_err.shape[1], -1), patches_err], dim=0)
         patches_avg = rearrange(patches_avg, 't b c -> b t c')
         patches_err = rearrange(patches_err, 't b c -> b t c')
