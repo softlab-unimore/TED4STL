@@ -21,8 +21,8 @@ python3 finetune_script_forecasting_dlinear.py --dataset electricity --mode dlin
 python3 script_forecasting_normal.py --dataset ETTh1 --mode MAE
 python3 finetune_script_forecasting_normal.py --dataset ETTh1 --mode MAE
 
-python3 script_forecasting_normal.py --dataset ETTm2 --mode MAE
-python3 finetune_script_forecasting_normal.py --dataset ETTm2 --mode MAE
+python3 script_forecasting_normal.py --dataset ETTm1 --mode MAE
+python3 finetune_script_forecasting_normal.py --dataset ETTm1 --mode MAE
 
 #python3 script_forecasting_normal.py --dataset  national_illness --mode MAE --n_length 96
 #python3 finetune_script_forecasting_normal.py --dataset national_illness --mode MAE --n_length 96
