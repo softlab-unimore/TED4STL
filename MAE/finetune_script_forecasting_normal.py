@@ -2,6 +2,7 @@ import json
 import os
 import argparse
 import math
+from datetime import datetime
 
 import torch.nn
 from torch.utils.data import TensorDataset
@@ -28,6 +29,10 @@ def setup_seed(seed=42):
 
 def get_avg(result_list):
     return sum(result_list)/len(result_list)
+
+def name_with_datetime(prefix='default'):
+    now = datetime.now()
+    return prefix + '_' + now.strftime("%Y%m%d_%H%M%S")
 
 def cal_metrics(pred, target):
     return {
@@ -76,6 +81,7 @@ if __name__ == '__main__':
     data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = load_forecast_csv(args.dataset)
     dataset_name = args.dataset
     print("Dataset:", args.dataset)
+    dir = f'{dataset_name}__{name_with_datetime(args.run_name)}'
 
     train_data = data[:, train_slice]
     vali_data = data[:, valid_slice]
@@ -269,14 +275,16 @@ if __name__ == '__main__':
                                                                                                    avg_val_loss, avg_val_mae,
                                                                                                    avg_val_mse))
 
-
             # use F1 to select best model
             if avg_val_mse < best_val_mse or epoch == 0:
                 best_val_mse = avg_val_mse
                 print(f'saving best model with F1 {best_val_mse} at {epoch} epoch!')
-                if not os.path.exists(f'save/finetune/{args.mode}/{arch}'):
-                    os.makedirs(f'save/finetune/{args.mode}/{arch}')
-                FT_model_path = f'save/finetune/{args.mode}/{arch}/' + f'{arch}_{pred_len}' + str(args.labelled_ratio) + '.pkl'
+                if not os.path.exists(
+                        f'{args.model_path}/forecasting/B{args.batch_size}_E{args.emb_dim}/{args.mode}/{dir}/'):
+                    os.makedirs(
+                        f'{args.model_path}/forecasting/B{args.batch_size}_E{args.emb_dim}/{args.mode}/{dir}/')
+                FT_model_path = f'{args.model_path}/forecasting/B{args.batch_size}_E{args.emb_dim}/{args.mode}/{dir}/' + f'{arch}_{pred_len}' + str(
+                    args.labelled_ratio) + '.pkl'
                 torch.save(model, FT_model_path)
 
             # if epoch % 10 == 0:
