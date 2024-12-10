@@ -6,7 +6,7 @@ from moving_avg_tensor_dataset import MovingAvg
 
 class TimeSeriesDatasetWithMovingAvg_Finetune(TensorDataset):
 
-    def __init__(self, original_dataset: Tensor, n_time_cols,  kernel_size=9, seq_len=336, pred_len=24, labelled_ratio=0.1, mode='train', dataset_name='ETTh1'):
+    def __init__(self, original_dataset: Tensor, n_time_cols,  kernel_size=25, seq_len=336, pred_len=24, labelled_ratio=0.1, mode='train', dataset_name='ETTh1'):
         self.n_time_cols = n_time_cols
         self.mode = mode
         self.seq_len = seq_len
@@ -54,7 +54,7 @@ class TimeSeriesDatasetWithMovingAvg_Finetune(TensorDataset):
 
 
 class TimeSeriesDataset_Finetune(TensorDataset):
-    def __init__(self, original_dataset: Tensor, n_time_cols,  kernel_size=9, seq_len=336, pred_len=24, labelled_ratio=0.1, mode='train', dataset_name='ETTh1'):
+    def __init__(self, original_dataset: Tensor, n_time_cols, seq_len=336, pred_len=24, labelled_ratio=0.1, mode='train', dataset_name='ETTh1'):
         self.n_time_cols = n_time_cols
         self.mode = mode
         self.seq_len = seq_len
