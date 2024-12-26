@@ -79,6 +79,10 @@ if __name__ == '__main__':
     test_data = data[:, test_slice]
 
     for pred_len in pred_lens:
+        print('----------------------------------------')
+        print('Start training for pred_len:', pred_len)
+        print('----------------------------------------')
+
         train_dataset = TimeSeriesDatasetWithMovingAvg(torch.from_numpy(train_data).to(torch.float), n_time_cols=n_time_cols, seq_len=args.n_length, pred_len=pred_len)
 
         train_loader = torch.utils.data.DataLoader(

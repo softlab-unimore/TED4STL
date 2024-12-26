@@ -73,6 +73,11 @@ if __name__ == '__main__':
     test_data = data[:, test_slice]
 
     for pred_len in pred_lens:
+
+        print('----------------------------------------')
+        print('Start training for pred_len:', pred_len)
+        print('----------------------------------------')
+
         train_dataset = TimeSeriesDataset(
             torch.from_numpy(train_data).to(torch.float),
             seq_len=args.n_length,
