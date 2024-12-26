@@ -4,10 +4,10 @@ python3 finetune_script_forecasting_dlinear.py --dataset ETTh1 --mode dlinear
 
 python3 script_forecasting_dlinear.py --dataset ETTm1 --mode dlinear
 python3 finetune_script_forecasting_dlinear.py --dataset ETTm1 --mode dlinear
-#
-#python3 script_forecasting_dlinear.py --dataset  national_illness --mode dlinear --n_length 96
-#python3 finetune_script_forecasting_dlinear.py --dataset national_illness --mode dlinear --n_length 96
-#
+
+python3 script_forecasting_dlinear.py --dataset  national_illness --mode dlinear --n_length 96 --batch_size 32
+python3 finetune_script_forecasting_dlinear.py --dataset national_illness --mode dlinear --n_length 96 --finetune_batch_size 32 --batch_size 32
+
 python3 script_forecasting_dlinear.py --dataset  WTH --mode dlinear
 python3 finetune_script_forecasting_dlinear.py --dataset WTH --mode dlinear
 
@@ -24,8 +24,8 @@ python3 finetune_script_forecasting_normal.py --dataset ETTh1 --mode MAE
 python3 script_forecasting_normal.py --dataset ETTm1 --mode MAE
 python3 finetune_script_forecasting_normal.py --dataset ETTm1 --mode MAE
 
-#python3 script_forecasting_normal.py --dataset  national_illness --mode MAE --n_length 96
-#python3 finetune_script_forecasting_normal.py --dataset national_illness --mode MAE --n_length 96
+python3 script_forecasting_normal.py --dataset  national_illness --mode MAE --n_length 96 --batch_size 32
+python3 finetune_script_forecasting_normal.py --dataset national_illness --mode MAE --n_length 96 --finetune_batch_size 32 --batch_size 32
 
 python3 script_forecasting_normal.py --dataset  WTH --mode MAE
 python3 finetune_script_forecasting_normal.py --dataset WTH --mode MAE
