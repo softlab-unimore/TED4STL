@@ -1,5 +1,4 @@
 import torch
-import timm
 import numpy as np
 
 from einops import repeat, rearrange
@@ -99,9 +98,7 @@ class MAE_Decoder_Dlinear(torch.nn.Module):
 
         """The output dimension of self.head is channel*patch_size[0] *patch_size[1]"""
         self.head = torch.nn.Linear(emb_dim, 1 * patch_size[0] *patch_size[1])  # 3 * patch_size ** 2
-        self.patch2img = Rearrange('(h w) b (c p1 p2) -> b c (h p1) (w p2)',
-                        p1=patch_size[0], p2=patch_size[1], h=sample_size[0]//patch_size[0],
-                                   w=sample_size[1]//patch_size[1])
+        self.patch2img = Rearrange('(h w) b (c p1 p2) -> b c (h p1) (w p2)', p1=patch_size[0], p2=patch_size[1], h=sample_size[0]//patch_size[0], w=sample_size[1]//patch_size[1])
 
         self.init_weight()
 

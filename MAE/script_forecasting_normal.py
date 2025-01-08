@@ -1,13 +1,9 @@
 import argparse
 import math
 
-
-from torch.utils.data import TensorDataset
-
 from tqdm import tqdm
 from model import *
 
-from utils import yaml_config_hook
 from datautils import load_forecast_csv
 from save_model import save_model
 
@@ -46,6 +42,7 @@ if __name__ == '__main__':
     parser.add_argument('--finetune_epochs', default=31, type=int)
     parser.add_argument('--finetune_seed', default=42, type=int)
     parser.add_argument('--pretrain', default=True, type=bool)
+    parser.add_argument('--short_term', action='store_true', default=False)
 
     args = parser.parse_args()
     setup_seed(args.seed)
@@ -65,7 +62,7 @@ if __name__ == '__main__':
 
     print("-------------- LOAD DATASET: PREPROCESSING ------------------------")
 
-    data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = load_forecast_csv(args.dataset)
+    data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = load_forecast_csv(args.dataset, args.short_term)
     dataset_name = args.dataset
 
     train_data = data[:, train_slice]

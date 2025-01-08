@@ -1,9 +1,6 @@
 import argparse
 import math
 
-import numpy as np
-from torch.utils.data import TensorDataset
-from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from model import *
 from datautils import load_forecast_csv
@@ -52,6 +49,7 @@ if __name__ == '__main__':
     parser.add_argument('--finetune_epochs', default=31, type=int)
     parser.add_argument('--finetune_seed', default=42, type=int)
     parser.add_argument('--pretrain', default=True, type=bool)
+    parser.add_argument('--short_term', action='store_true', default=False)
 
     args = parser.parse_args()
     setup_seed(args.seed)
@@ -71,7 +69,7 @@ if __name__ == '__main__':
 
     print("-------------- LOAD DATASET: PREPROCESSING ------------------------")
 
-    data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = load_forecast_csv(args.dataset)
+    data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = load_forecast_csv(args.dataset, args.short_term)
     dataset_name = args.dataset
 
     train_data = data[:, train_slice]
@@ -105,8 +103,7 @@ if __name__ == '__main__':
             weight_decay=args.weight_decay
         )
 
-        lr_func = lambda epoch: min((epoch + 1) / (args.warmup_epoch + 1e-8),
-                                    0.5 * (math.cos(epoch / args.total_epoch * math.pi) + 1))
+        lr_func = lambda epoch: min((epoch + 1) / (args.warmup_epoch + 1e-8), 0.5 * (math.cos(epoch / args.total_epoch * math.pi) + 1))
         lr_scheduler = torch.optim.lr_scheduler.LambdaLR(optim, lr_lambda=lr_func, verbose=True)
 
         step_count = 0

@@ -5,11 +5,8 @@ import math
 from datetime import datetime
 
 import torch.nn
-from torch.utils.data import TensorDataset
 from tqdm import tqdm
 import random
-from model import *
-# from utils import yaml_config_hook
 from datautils import load_forecast_csv
 from finetune_train_tensor_dataset import TimeSeriesDataset_Finetune
 
@@ -66,6 +63,7 @@ if __name__ == '__main__':
     parser.add_argument('--pretrain', default=True, type=bool)
     parser.add_argument('--run_name', default='forecast_multivar',
                         help='The folder name used to save model, output and evaluation metrics. This can be set to any word')
+    parser.add_argument('--short_term', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -78,7 +76,7 @@ if __name__ == '__main__':
 
     print("-------------- LOAD DATASET: PREPROCESSING ------------------------")
 
-    data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = load_forecast_csv(args.dataset)
+    data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = load_forecast_csv(args.dataset, short_term=args.short_term)
     dataset_name = args.dataset
     print("Dataset:", args.dataset)
     dir = f'{dataset_name}__{name_with_datetime(args.run_name)}'
