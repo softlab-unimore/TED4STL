@@ -16,7 +16,7 @@ def _get_time_features(dt):
     ], axis=1).astype(float)
 
 
-def load_forecast_csv(name, univar=False):
+def load_forecast_csv(name, short_term, univar=False):
     data = pd.read_csv(f'./datasets/{name}.csv', index_col='date', parse_dates=True)
 
     dt_embed = _get_time_features(data.index)
@@ -69,6 +69,9 @@ def load_forecast_csv(name, univar=False):
         pred_lens = [24, 36, 48, 60]
     else:
         pred_lens = [24, 48, 96, 288, 672]
+
+    if short_term:
+        pred_lens = [6,8,10, 12, 14, 16, 18, 20, 22, 24]
         
     return data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_covariate_cols
 
