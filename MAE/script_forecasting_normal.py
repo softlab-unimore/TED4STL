@@ -1,5 +1,8 @@
 import argparse
+import datetime
+import json
 import math
+import time
 
 from tqdm import tqdm
 from model import *
@@ -104,6 +107,8 @@ if __name__ == '__main__':
                                     0.5 * (math.cos(epoch / args.total_epoch * math.pi) + 1))
         lr_scheduler = torch.optim.lr_scheduler.LambdaLR(optim, lr_lambda=lr_func, verbose=True)
 
+        t = time.time()
+
         step_count = 0
         optim.zero_grad()
         min_loss = 100
@@ -138,5 +143,13 @@ if __name__ == '__main__':
                 min_loss = avg_loss
                 save_model(args, model, args.mode, pred_len, optim)
                 print("Model update with loss {}.".format(min_loss))
+
+        t = time.time() - t
+
+        print(f"\nTraining time: {datetime.timedelta(seconds=t)}\n")
+        with open(
+                f'./{args.model_path}/forecasting/B{args.batch_size}_E{args.emb_dim}/{args.mode}/Pretrained_{args.dataset}_{args.emb_dim}_{pred_len}/exec_time.json',
+                'w') as json_file:
+            json.dump({'exec_time': t, 'exec_time_formatted': f'{datetime.timedelta(seconds=t)}'}, json_file, indent=4)
 
     print("Finished")
