@@ -65,6 +65,7 @@ if __name__ == '__main__':
     parser.add_argument('--pretrain', default=True, type=bool)
     parser.add_argument('--run_name', default='forecast_multivar', help='The folder name used to save model, output and evaluation metrics. This can be set to any word')
     parser.add_argument('--short_term', action='store_true', default=False)
+    parser.add_argument('--kernel_size', default=25, type=int)
 
     args = parser.parse_args()
 
@@ -90,6 +91,7 @@ if __name__ == '__main__':
     loss_train_avg = {}
     loss_val_avg = {}
     loss_test_avg = {}
+    best_valid_score = {}
 
     for pred_len in pred_lens:
 
@@ -100,7 +102,8 @@ if __name__ == '__main__':
             pred_len=pred_len,
             labelled_ratio=args.labelled_ratio,
             mode='train',
-            dataset_name=dataset_name
+            dataset_name=dataset_name,
+            kernel_size=args.kernel_size
         )
 
         # load val data
@@ -111,7 +114,8 @@ if __name__ == '__main__':
             pred_len=pred_len,
             labelled_ratio=args.labelled_ratio,
             mode='val',
-            dataset_name=dataset_name
+            dataset_name=dataset_name,
+            kernel_size=args.kernel_size
         )
 
         # load test data
@@ -122,7 +126,8 @@ if __name__ == '__main__':
             pred_len=pred_len,
             labelled_ratio=args.labelled_ratio,
             mode='test',
-            dataset_name=dataset_name
+            dataset_name=dataset_name,
+            kernel_size=args.kernel_size
         )
 
         train_dataloader = torch.utils.data.DataLoader(
@@ -354,6 +359,8 @@ if __name__ == '__main__':
                         }
                     }
 
+                    best_valid_score[int(pred_len)] = avg_val_mse
+
     with open(f'./{args.model_path}/forecasting/B{args.batch_size}_E{args.emb_dim}/{args.mode}/{dir}/eval_res.json', 'w') as f:
         eval_res = {
             'ours': ours_result
@@ -368,3 +375,6 @@ if __name__ == '__main__':
 
     with open(f'./{args.model_path}/forecasting/B{args.batch_size}_E{args.emb_dim}/{args.mode}/{dir}/loss_test_avg.json', 'w') as f:
         json.dump(loss_test_avg, f, indent=4)
+
+    with open(f'./{args.model_path}/forecasting/B{args.batch_size}_E{args.emb_dim}/{args.mode}/{dir}/valid_best_score.json', 'w') as f:
+        json.dump(best_valid_score, f, indent=4)

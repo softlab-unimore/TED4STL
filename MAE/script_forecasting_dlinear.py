@@ -53,6 +53,7 @@ if __name__ == '__main__':
     parser.add_argument('--finetune_seed', default=42, type=int)
     parser.add_argument('--pretrain', default=True, type=bool)
     parser.add_argument('--short_term', action='store_true', default=False)
+    parser.add_argument('--kernel_size', default=25, type=int)
 
     args = parser.parse_args()
     setup_seed(args.seed)
@@ -84,7 +85,7 @@ if __name__ == '__main__':
         print('Start training for pred_len:', pred_len)
         print('----------------------------------------')
 
-        train_dataset = TimeSeriesDatasetWithMovingAvg(torch.from_numpy(train_data).to(torch.float), n_time_cols=n_time_cols, seq_len=args.n_length, pred_len=pred_len)
+        train_dataset = TimeSeriesDatasetWithMovingAvg(torch.from_numpy(train_data).to(torch.float), n_time_cols=n_time_cols, seq_len=args.n_length, pred_len=pred_len, kernel_size=args.kernel_size)
 
         train_loader = torch.utils.data.DataLoader(
             train_dataset,
