@@ -359,7 +359,7 @@ if __name__ == '__main__':
                         }
                     }
 
-                    best_valid_score[int(pred_len)] = avg_val_mse
+                    best_valid_score[int(pred_len)] = float(avg_val_mse)
 
     with open(f'./{args.model_path}/forecasting/B{args.batch_size}_E{args.emb_dim}/{args.mode}/{dir}/eval_res.json', 'w') as f:
         eval_res = {
