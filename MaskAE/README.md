@@ -1,7 +1,7 @@
 # MAE: Implementation with 2 - step pipeline
 
 <p align="center">
-    <img src="./images/mae.png" alt="mae" width=600>
+    <img src="./images/maskae.png" alt="mae" width=600>
 </p>
 
 ## Dependencies
