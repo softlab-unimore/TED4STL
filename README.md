@@ -1,11 +1,11 @@
 # trend-and-error-decomposition-for-ssl-models
 
 <p align="center">
-<img src=".\images\pipeline_1step.png" width = "600" alt="" align=center />
+<img src=".\images\1_pipeline_step_1.pdf" width = "600" alt="" align=center />
 </p>
 
 <p align="center">
-<img src=".\images\pipeline_2step.png" width = "600" alt="" align=center />
+<img src=".\images\2_pipeline_step_1.pdf" width = "600" alt="" align=center />
 </p>
 
 ## Datasets
