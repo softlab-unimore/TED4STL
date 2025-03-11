@@ -104,7 +104,8 @@ if __name__ == "__main__":
             lr=args.lr,
             output_dims=32,
             max_train_length=args.max_train_length,
-            ci=args.ci
+            ci=args.ci,
+            kernel_size=args.kernel_size
         )
 
         # Train a TS2Vec model
