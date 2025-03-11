@@ -1,22 +1,9 @@
 import numpy as np
 import time
 
-import torch
-
 from . import _eval_protocols as eval_protocols
 
 
-def generate_pred_samples_seq_len(features, data, pred_len, seq_len, drop=0):
-    n = data.shape[1] - seq_len - pred_len + 1
-
-    features = np.stack([ features[:, i:i+seq_len] for i in range(n)], axis=1)[:, 1:]
-    labels = np.stack([data[:, i+seq_len:i+seq_len+pred_len] for i in range(n)], axis=1)[:, 1:]
-    features = features.mean(axis=2)
-
-    features = features[:, drop:]
-    labels = labels[:, drop:]
-
-    return features.squeeze(), labels.reshape(-1, labels.shape[2]*labels.shape[3])
 
 def generate_pred_samples(features, data, pred_len, drop=0):
     n = data.shape[1]
@@ -34,7 +21,7 @@ def cal_metrics(pred, target):
     }
 
 
-def eval_forecasting(model, data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_covariate_cols, seq_len, mode, ci):
+def eval_forecasting(model, data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_covariate_cols):
     padding = 200
 
     t = time.time()
@@ -70,14 +57,9 @@ def eval_forecasting(model, data, train_slice, valid_slice, test_slice, scaler, 
     lr_infer_time = {}
     out_log = {}
     for pred_len in pred_lens:
-        if seq_len is None:
-            train_features, train_labels = generate_pred_samples(train_repr, train_data, pred_len, drop=padding)
-            valid_features, valid_labels = generate_pred_samples(valid_repr, valid_data, pred_len)
-            test_features, test_labels = generate_pred_samples(test_repr, test_data, pred_len)
-        else:
-            train_features, train_labels = generate_pred_samples_seq_len(train_repr, train_data, pred_len, seq_len, drop=padding)
-            valid_features, valid_labels = generate_pred_samples_seq_len(valid_repr, valid_data, pred_len, seq_len)
-            test_features, test_labels = generate_pred_samples_seq_len(test_repr, test_data, pred_len, seq_len)
+        train_features, train_labels = generate_pred_samples(train_repr, train_data, pred_len, drop=padding)
+        valid_features, valid_labels = generate_pred_samples(valid_repr, valid_data, pred_len)
+        test_features, test_labels = generate_pred_samples(test_repr, test_data, pred_len)
 
         print("train feature: ", train_features.shape)
         print("train labels: ", train_labels.shape)
@@ -89,10 +71,8 @@ def eval_forecasting(model, data, train_slice, valid_slice, test_slice, scaler, 
 
         t = time.time()
 
-        if 'mlp' in mode.lower():
-            lr = eval_protocols.fit_mlp(train_features, train_labels, valid_features, valid_labels)
-        else:
-            lr = eval_protocols.fit_ridge(train_features, train_labels, valid_features, valid_labels)
+        lr = eval_protocols.fit_ridge(train_features, train_labels, valid_features, valid_labels)
+        # lr = eval_protocols.fit_mlp(train_features, train_labels, valid_features, valid_labels)
 
         lr_train_time[pred_len] = time.time() - t
 

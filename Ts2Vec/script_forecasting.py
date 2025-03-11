@@ -3,19 +3,15 @@ import json
 
 import torch.cuda
 
-from tasks import eval_classification
 from ts2vec import TS2Vec
 import datautils
 import utils
 import os
 import time
 import datetime
-import pandas as pd
-from configparser import ConfigParser
 from tasks.forecasting import eval_forecasting
 from ts2vec_ablation import TS2VecAblation
 from ts2vec_dlinear import TS2VecDlinear
-from dlinear_exp import DLinear
 
 
 def create_model(type_of_train, dim, n_time_cols, current_device, configuration):
@@ -23,105 +19,94 @@ def create_model(type_of_train, dim, n_time_cols, current_device, configuration)
         return TS2VecDlinear(input_dims=dim, device=current_device, mode=type_of_train, n_time_cols=n_time_cols, **configuration)
     return TS2Vec(input_dims=dim, device=current_device, mode=type_of_train, n_time_cols=n_time_cols, **configuration)
 
+if __name__ == "__main__":
+    config = argparse.ArgumentParser()
+    config.add_argument('--dataset', type=str, default='ETTh1', help='The dataset name')
+    config.add_argument('--run_name', help='The folder name used to save model, output and evaluation metrics. This can be set to any word')
+    config.add_argument('--mode', type=str, default='ts2vec-Dlinear-one-loss')
+    config.add_argument('--loader', type=str, required=True, help='The data loader used to load the experimental data. This can be set to UCR, UEA, forecast_csv, forecast_csv_univar, anomaly, or anomaly_coldstart')
+    config.add_argument('--gpu', type=int, default=0, help='The gpu no. used for training and inference (defaults to 0)')
+    config.add_argument('--batch-size', type=int, default=8, help='The batch size (defaults to 8)')
+    config.add_argument('--lr', type=float, default=0.001, help='The learning rate (defaults to 0.001)')
+    config.add_argument('--repr-dims', type=int, default=320, help='The representation dimension (defaults to 320)')
+    config.add_argument('--max-train-length', type=int, default=3000, help='For sequence with a length greater than <max_train_length>, it would be cropped into some sequences, each of which has a length less than <max_train_length> (defaults to 3000)')
+    config.add_argument('--iters', type=int, default=None, help='The number of iterations')
+    config.add_argument('--epochs', type=int, default=None, help='The number of epochs')
+    config.add_argument('--save-every', type=int, default=None, help='Save the checkpoint every <save_every> iterations/epochs')
+    config.add_argument('--seed', type=int, default=None, help='The random seed')
+    config.add_argument('--max-threads', type=int, default=None, help='The maximum allowed number of threads used by this process')
+    config.add_argument('--eval', action="store_true", help='Whether to perform evaluation after training')
+    config.add_argument('--irregular', type=float, default=0, help='The ratio of missing observations (defaults to 0)')
+    config.add_argument('--ci', action='store_true', default=False)
+    config.add_argument('--short-term', action='store_true', default=False)
+    args = config.parse_args()
 
-# To configure the path to store the files and the dataset
-# config = ConfigParser()
-# config.read('config_forecasting.ini')
-# mode = config['EXECUTION TYPE'].get('mode')
-# path = config['SETTINGS'].get('path')
-# dataset = config['SETTINGS'].get('dataset')
-# ci = config['PARAMETERS'].getboolean('ci')
-# seq_len = config['PARAMETERS'].get('seq_len')
+    # set GPU
+    device = utils.init_dl_program(0, seed=42, max_threads=8)
 
-config = argparse.ArgumentParser()
-config.add_argument('--mode', type=str, default='ts2vec-Dlinear-one-loss')
-config.add_argument('--path', type=str, default='/home/n269362/projects/ts2vec')
-config.add_argument('--dataset', type=str, default='WTH')
-config.add_argument('--ci', action='store_true', default=False)
-config.add_argument('--seq_len', type=int, default=None)
+    print("-------------- LOAD DATASET: PREPROCESSING ------------------------")
 
-args = config.parse_args()
-mode = args.mode
-path = args.path
-dataset = args.dataset
-ci = args.ci
-seq_len = args.seq_len
+    if args.loader == 'forecast_csv':
+        task_type = 'forecasting'
+        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(args.dataset, short_term=args.short_term)
+        train_data = data[:, train_slice]
+    elif args.loader == 'forecast_csv_univar':
+        task_type = 'forecasting'
+        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(args.dataset, short_term=args.short_term, univar=True)
+        train_data = data[:, train_slice]
+    else:
+        raise ValueError(f"Unknown loader {args.loader}.")
 
+    print("Data after StandarScaler on n_coviariate_cols and original features")
+    print(data.shape)
+    print("train:", train_slice)
+    print("valid: ", valid_slice)
+    print("test:", test_slice)
+    print("pred_lens: ", pred_lens)
+    print("n_time_cols:", n_time_cols)
+    print('------------')
+    print(scaler)
 
-# To extract the csv from the electricity dataset: it is downloaded as a txt file named as LD2011_2014
-if dataset == 'LD2011_2014':
-    data_ecl = pd.read_csv(f'datasets/{dataset}.txt', parse_dates=True, sep=';', decimal=',', index_col=0)
-    data_ecl = data_ecl.resample('1h', closed='right').sum()
-    data_ecl = data_ecl.loc[:, data_ecl.cumsum(axis=0).iloc[8920] != 0]  # filter out instances with missing values
-    data_ecl.index = data_ecl.index.rename('date')
-    data_ecl = data_ecl['2012':]
-    data_ecl.to_csv(f'datasets/{dataset}.csv')
-    dataset = 'electricity'
+    train_data = data[:, train_slice]
+    valid_data = data[:, valid_slice]
+    test_data = data[:, test_slice]
+    print(train_data.shape)
 
-# set GPU
-device = utils.init_dl_program(0, seed=42, max_threads=8)
+    #Creation of dirs to store results
+    run_dir = f'{args.path}/training/forecasting/{args.mode}/{args.dataset}__ {utils.name_with_datetime("forecast_multivar")}'
+    os.makedirs(run_dir, exist_ok=True)
 
-torch.cuda.empty_cache()
-
-print("-------------- LOAD DATASET: PREPROCESSING ------------------------")
-
-data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(dataset)
-# (Both train_data and test_data have a shape of n_instances x n_timestamps x n_features)
-
-print("Data after StandarScaler on n_coviariate_cols and original features")
-print(data)
-print(data.shape)
-print("train:", train_slice)
-print("valid: ", valid_slice)
-print("test:", test_slice)
-print("pred_lens: ", pred_lens)
-print("n_time_cols:", n_time_cols)
-print('------------')
-print(scaler)
-
-train_data = data[:, train_slice]
-valid_data = data[:, valid_slice]
-test_data = data[:, test_slice]
-print(train_data)
-print(train_data.shape)
-
-#Creation of dirs to store results
-string_seq_len = f'seq_len_{seq_len}' if seq_len else 'normal'
-run_dir = f'{path}/training/forecasting/{string_seq_len}/{mode}/' + dataset + '__' + utils.name_with_datetime('forecast_multivar')
-os.makedirs(run_dir, exist_ok=True)
-
-if mode.lower() != 'DLinear'.lower():
 
     print("\n------------------- TRAINING ENCODER -------------------\n")
 
-    if not ci:
+    if not args.ci:
         input_dim = train_data.shape[-1]
         # input_dim = train_data.shape[-1] - n_time_cols
-        if mode == 'feature':
+        if args.mode == 'feature':
             input_dim = train_data.shape[-1] + train_data.shape[-1] - n_time_cols
 
         config = dict(
-            batch_size=8,
-            lr=0.001,
-            output_dims=320,
-            max_train_length=3000,
-            ci=ci
+            batch_size=args.batch_size,
+            lr=args.lr,
+            output_dims=args.repr_dims,
+            max_train_length=args.max_train_length,
+            ci=args.ci
         )
 
         # Train a TS2Vec model
-        model = create_model(mode, input_dim, n_time_cols, device, config)
+        model = create_model(args.mode, input_dim, n_time_cols, device, config)
         # model = TS2VecAblation(input_dims=input_dim, device=device, mode='ts2vec-ablation-err', n_time_cols=n_time_cols, **config)
     else:
         config = dict(
             batch_size=4,
-            lr=0.001,
+            lr=args.lr,
             output_dims=32,
-            max_train_length=3000,
-            ci=ci
+            max_train_length=args.max_train_length,
+            ci=args.ci
         )
 
         # Train a TS2Vec model
-        model = create_model(mode, 1, n_time_cols, device, config)
+        model = create_model(args.mode, 1, n_time_cols, device, config)
 
     t = time.time()
 
@@ -131,59 +116,26 @@ if mode.lower() != 'DLinear'.lower():
         n_iters=None,
         verbose=True
     )
-
-    if 'ts2vec-dlinear' in mode.lower():
-        model.save(f'{run_dir}/model_avg.pkl', f'{run_dir}/model_err.pkl')
-    else:
-        model.save(f'{run_dir}/model.pkl')
+    model.save(f'{run_dir}/model_avg.pkl', f'{run_dir}/model_err.pkl')
 
     t = time.time() - t
     print(f"\nTraining time: {datetime.timedelta(seconds=t)}\n")
 
-    print("\n----------------- EVAL FORECASTING -------------------\n")
+    if args.eval:
+        print("\n----------------- EVAL FORECASTING -------------------\n")
 
-    out, eval_res = eval_forecasting(model, data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols, seq_len, mode, ci)
+        out, eval_res = eval_forecasting(model, data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols)
 
-    print("\n----------------- FINAL RESULTS --------------------\n")
+        print("\n----------------- FINAL RESULTS --------------------\n")
 
-    utils.pkl_save(f'{run_dir}/out.pkl', out)
-    utils.pkl_save(f'{run_dir}/eval_res.pkl', eval_res)
-    with open(f'{run_dir}/eval_res.json', 'w') as json_file:
-        json.dump(eval_res, json_file, indent=4)
+        utils.pkl_save(f'{run_dir}/out.pkl', out)
+        utils.pkl_save(f'{run_dir}/eval_res.pkl', eval_res)
+        with open(f'{run_dir}/eval_res.json', 'w') as json_file:
+            json.dump(eval_res, json_file, indent=4)
 
-    print('Evaluation result:', eval_res)
+        print('Evaluation result:', eval_res)
 
-else:
-    print("\n----------------- EVAL FORECASTING -------------------\n")
 
-    results = {'ours': {}}
-    for pred_len in pred_lens:
-        config = dict(
-            name_dataset = dataset,
-            seq_len=seq_len if seq_len else 96,
-            pred_len=pred_len,
-            enc_in=data.shape[-1]-n_time_cols,
-            individual=False,
-            lr = 0.001,
-            batch_size = 16 if dataset == 'electricity' else 8,
-        )
+    torch.cuda.empty_cache()
 
-        model = DLinear(device, n_time_cols, run_dir, **config)
-
-        print(f"Training DLinear for pred_len = {pred_len}")
-
-        model.train(train_data, valid_data, test_data, scaler)
-
-        print(f"Testing DLinear for pred_len = {pred_len}")
-
-        results = model.test(test_data, scaler, results=results)
-
-    print("\n----------------- FINAL RESULTS --------------------\n")
-
-    print(results)
-    with open(f'{run_dir}/eval_res.json', 'w') as json_file:
-        json.dump(results, json_file, indent=4)
-
-torch.cuda.empty_cache()
-
-print("Finished")
+    print("Finished")

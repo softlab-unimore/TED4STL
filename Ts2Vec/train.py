@@ -1,14 +1,11 @@
-import torch
-import numpy as np
 import argparse
 import os
-import sys
 import time
 import datetime
 from ts2vec import TS2Vec
 import tasks
 import datautils
-from utils import init_dl_program, name_with_datetime, pkl_save, data_dropout
+from utils import init_dl_program, name_with_datetime, pkl_save
 
 def save_checkpoint_callback(
     save_every=1,
@@ -38,6 +35,7 @@ if __name__ == '__main__':
     parser.add_argument('--max-threads', type=int, default=None, help='The maximum allowed number of threads used by this process')
     parser.add_argument('--eval', action="store_true", help='Whether to perform evaluation after training')
     parser.add_argument('--irregular', type=float, default=0, help='The ratio of missing observations (defaults to 0)')
+    parser.add_argument('--short-term', action='store_true', default=False)
     args = parser.parse_args()
     
     print("Dataset:", args.dataset)
@@ -46,55 +44,17 @@ if __name__ == '__main__':
     device = init_dl_program(args.gpu, seed=args.seed, max_threads=args.max_threads)
     
     print('Loading data... ', end='')
-    if args.loader == 'UCR':
-        task_type = 'classification'
-        train_data, train_labels, test_data, test_labels = datautils.load_UCR(args.dataset)
-        
-    elif args.loader == 'UEA':
-        task_type = 'classification'
-        train_data, train_labels, test_data, test_labels = datautils.load_UEA(args.dataset)
-        
-    elif args.loader == 'forecast_csv':
+
+    if args.loader == 'forecast_csv':
         task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_covariate_cols = datautils.load_forecast_csv(args.dataset)
+        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_covariate_cols = datautils.load_forecast_csv(args.dataset, short_term=args.short_term)
         train_data = data[:, train_slice]
-        
     elif args.loader == 'forecast_csv_univar':
         task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_covariate_cols = datautils.load_forecast_csv(args.dataset, univar=True)
+        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_covariate_cols = datautils.load_forecast_csv(args.dataset, short_term=args.short_term, univar=True)
         train_data = data[:, train_slice]
-        
-    elif args.loader == 'forecast_npy':
-        task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_covariate_cols = datautils.load_forecast_npy(args.dataset)
-        train_data = data[:, train_slice]
-        
-    elif args.loader == 'forecast_npy_univar':
-        task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_covariate_cols = datautils.load_forecast_npy(args.dataset, univar=True)
-        train_data = data[:, train_slice]
-        
-    elif args.loader == 'anomaly':
-        task_type = 'anomaly_detection'
-        all_train_data, all_train_labels, all_train_timestamps, all_test_data, all_test_labels, all_test_timestamps, delay = datautils.load_anomaly(args.dataset)
-        train_data = datautils.gen_ano_train_data(all_train_data)
-        
-    elif args.loader == 'anomaly_coldstart':
-        task_type = 'anomaly_detection_coldstart'
-        all_train_data, all_train_labels, all_train_timestamps, all_test_data, all_test_labels, all_test_timestamps, delay = datautils.load_anomaly(args.dataset)
-        train_data, _, _, _ = datautils.load_UCR('FordA')
-        
     else:
         raise ValueError(f"Unknown loader {args.loader}.")
-        
-        
-    if args.irregular > 0:
-        if task_type == 'classification':
-            train_data = data_dropout(train_data, args.irregular)
-            test_data = data_dropout(test_data, args.irregular)
-        else:
-            raise ValueError(f"Task type {task_type} is not supported when irregular>0.")
-    print('done')
     
     config = dict(
         batch_size=args.batch_size,
@@ -117,6 +77,7 @@ if __name__ == '__main__':
         device=device,
         **config
     )
+
     loss_log = model.fit(
         train_data,
         n_epochs=args.epochs,
@@ -129,14 +90,8 @@ if __name__ == '__main__':
     print(f"\nTraining time: {datetime.timedelta(seconds=t)}\n")
 
     if args.eval:
-        if task_type == 'classification':
-            out, eval_res = tasks.eval_classification(model, train_data, train_labels, test_data, test_labels, eval_protocol='svm')
-        elif task_type == 'forecasting':
+        if task_type == 'forecasting':
             out, eval_res = tasks.eval_forecasting(model, data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_covariate_cols)
-        elif task_type == 'anomaly_detection':
-            out, eval_res = tasks.eval_anomaly_detection(model, all_train_data, all_train_labels, all_train_timestamps, all_test_data, all_test_labels, all_test_timestamps, delay)
-        elif task_type == 'anomaly_detection_coldstart':
-            out, eval_res = tasks.eval_anomaly_detection_coldstart(model, all_train_data, all_train_labels, all_train_timestamps, all_test_data, all_test_labels, all_test_timestamps, delay)
         else:
             assert False
         pkl_save(f'{run_dir}/out.pkl', out)
