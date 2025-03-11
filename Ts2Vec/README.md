@@ -23,9 +23,4 @@ After training and evaluation, the trained encoder, output and evaluation metric
 
 To train and evaluate TS2Vec on a dataset for classfication task, run the following command:
 
-```sh
-sh classication.sh
-```
-
-After training and evaluation, the trained encoder, output and evaluation metrics can be found in `training/classication/B{batch_size}_E{output_repr_dim}/<mode>/DatasetName__RunName_Date_Time/`. 
 
