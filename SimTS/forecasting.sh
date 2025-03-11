@@ -1,15 +1,15 @@
 
 # To run SimTS model with pipeline integration on forecastin task
-python3 script.py --dataset ETTh1 --eval
-python3 script.py --dataset ETTh2 --eval
-python3 script.py --dataset ETTm1 --eval
-python3 script.py --dataset ETTm2 --eval
-python3 script.py --dataset exchange_rate --eval
-python3 script.py --dataset WTH --eval
-python3 script.py --dataset electricity --eval
-python3 script.py --dataset weather --eval
-python3 script.py --dataset traffic --eval
-python3 script.py --dataset national_illness --eval
+python3 train_pipeline.py --dataset ETTh1 --eval
+python3 train_pipeline.py --dataset ETTh2 --eval
+python3 train_pipeline.py --dataset ETTm1 --eval
+python3 train_pipeline.py --dataset ETTm2 --eval
+python3 train_pipeline.py --dataset exchange_rate --eval
+python3 train_pipeline.py --dataset WTH --eval
+python3 train_pipeline.py --dataset electricity --eval
+python3 train_pipeline.py --dataset weather --eval
+python3 train_pipeline.py --dataset traffic --eval
+python3 train_pipeline.py --dataset national_illness --eval
 
 # To run original SimTS model on forecasting task
 python3 train_simts.py --dataset ETTh1 --eval

@@ -51,6 +51,7 @@ if __name__ == '__main__':
     parser.add_argument('--experiment', type=str, default='base', help='Type of experiment to perform (defaluts to base)')
     parser.add_argument('--area', type=int, default=None, help='Type of experiment to perform (defaluts to base)')
     parser.add_argument('--mix', action="store_true", help='Whether to perform mix')
+    parser.add_argument('--short_term', action="store_true", help='Whether to perform short term forecasting')
     args = parser.parse_args()
     
     print("Dataset:", args.dataset)
@@ -66,43 +67,18 @@ if __name__ == '__main__':
         device = 'cpu'
     
     print('Loading data... ', end='')
-    if args.loader == 'UCR':
-        task_type = 'classification'
-        train_data, train_labels, test_data, test_labels = datautils.load_UCR(args.dataset)
-        
-    elif args.loader == 'UEA':
-        task_type = 'classification'
-        train_data, train_labels, test_data, test_labels = datautils.load_UEA(args.dataset)
-        
-    elif args.loader == 'forecast_csv':
+
+    if args.loader == 'forecast_csv':
         task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(args.dataset)
+        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(args.dataset, short_term=args.short_term)
         train_data = data[:, train_slice]
-        
     elif args.loader == 'forecast_csv_univar':
         task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(args.dataset, univar=True)
+        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(args.dataset, short_term=args.short_term, univar=True)
         train_data = data[:, train_slice]
-        
-    elif args.loader == 'forecast_npy':
-        task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_npy(args.dataset)
-        train_data = data[:, train_slice]
-        
-    elif args.loader == 'forecast_npy_univar':
-        task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_npy(args.dataset, univar=True)
-        train_data = data[:, train_slice]
-        
     else:
         raise ValueError(f"Unknown loader {args.loader}.")
-        
-    if args.irregular > 0:
-        if task_type == 'classification':
-            train_data = data_dropout(train_data, args.irregular)
-            test_data = data_dropout(test_data, args.irregular)
-        else:
-            raise ValueError(f"Task type {task_type} is not supported when irregular>0.")
+
     print('done',train_data.shape)
 
     config = dict(
@@ -154,12 +130,9 @@ if __name__ == '__main__':
 
     t = time.time() - t
     print(f"\nTraining time: {datetime.timedelta(seconds=t)}\n")
-    # TODO change save classifier for all conditions
+
     if args.eval:
-        if task_type == 'classification':
-            out, eval_res,clf = tasks.eval_classification(model,train_data, train_labels, test_data, test_labels, eval_protocol='svm')
-            joblib.dump(clf, f'{run_dir}/svm.pkl')
-        elif task_type == 'forecasting':
+        if task_type == 'forecasting':
             out, eval_res = tasks.eval_forecasting(model, data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols, run_dir)
         else:
             assert False

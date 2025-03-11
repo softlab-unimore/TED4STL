@@ -7,13 +7,11 @@ import argparse
 import os
 import time
 import datetime
-import joblib
 import tasks
 import datautils
 import utils
-from simts_ablation import SimTSAblation
 from simts_dlinear import SimTSDlinear
-from utils import init_dl_program, name_with_datetime, pkl_save, data_dropout
+from utils import init_dl_program, pkl_save
 
 
 def save_checkpoint_callback(
@@ -63,6 +61,8 @@ if __name__ == '__main__':
                         help='Type of experiment to perform (defaluts to base)')
     parser.add_argument('--area', type=int, default=None, help='Type of experiment to perform (defaluts to base)')
     parser.add_argument('--mix', action="store_true", help='Whether to perform mix')
+    parser.add_argument('--short_term', action="store_true", help='Whether to perform short term forecasting')
+    parser.add_argument('--eval', action="store_true", help='Whether to perform evaluation after training')
     args = parser.parse_args()
 
     print("Dataset:", args.dataset)
@@ -79,26 +79,14 @@ if __name__ == '__main__':
 
     print('Loading data... ', end='')
 
-    if args.loader == 'UCR':
-        task_type = 'classification'
-        train_data, train_labels, test_data, test_labels = datautils.load_UCR(args.dataset)
-
-    elif args.loader == 'UEA':
-        task_type = 'classification'
-        train_data, train_labels, test_data, test_labels = datautils.load_UEA(args.dataset)
-
-    elif args.loader == 'forecast_csv':
+    if args.loader == 'forecast_csv':
         task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(
-            args.dataset)
+        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(args.dataset, short_term=args.short_term)
         train_data = data[:, train_slice]
-
     elif args.loader == 'forecast_csv_univar':
         task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(
-            args.dataset, univar=True)
+        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(args.dataset, short_term=args.short_term, univar=True)
         train_data = data[:, train_slice]
-
     else:
         raise ValueError(f"Unknown loader {args.loader}.")
 
@@ -125,8 +113,6 @@ if __name__ == '__main__':
 
     if task_type == 'forecasting':
         run_dir = './' + args.dir + f'/B{args.batch_size}_E{args.repr_dims}/' + args.mode + '/' + args.dataset + '__' + utils.name_with_datetime('forecast_multivar')
-    elif task_type == 'classification':
-        run_dir = './' + args.dir + f'/B{args.batch_size}_E{args.repr_dims}/' + args.mode + '/' + args.dataset + '__' + utils.name_with_datetime('classification')
     else:
         assert False
     os.makedirs(run_dir, exist_ok=True)
@@ -134,19 +120,11 @@ if __name__ == '__main__':
     t = time.time()
     print("train_data size:", train_data.shape)
 
-
-    if args.mode == 'dlinear':
-        model = SimTSDlinear(
-            input_dims=train_data.shape[-1],
-            device=device,
-            **config
-        )
-    else:
-        model = SimTSAblation(
-            input_dims=train_data.shape[-1],
-            device=device,
-            **config
-        )
+    model = SimTSDlinear(
+        input_dims=train_data.shape[-1],
+        device=device,
+        **config
+    )
 
     loss_log, best_net_avg, best_net_err = model.fit(
         train_data,
@@ -162,18 +140,16 @@ if __name__ == '__main__':
     t = time.time() - t
     print(f"\nTraining time: {datetime.timedelta(seconds=t)}\n")
 
-    if task_type == 'classification':
-        out, eval_res, clf = tasks.eval_classification(model, train_data, train_labels, test_data, test_labels, eval_protocol='svm')
-        joblib.dump(clf, f'{run_dir}/svm.pkl')
-    elif task_type == 'forecasting':
-        out, eval_res = tasks.eval_forecasting(model, data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols, run_dir)
-    else:
-        assert False
-    pkl_save(f'{run_dir}/out.pkl', out)
-    pkl_save(f'{run_dir}/eval_res.pkl', eval_res)
-    print('Evaluation result:', eval_res)
+    if args.eval:
+        if task_type == 'forecasting':
+            out, eval_res = tasks.eval_forecasting(model, data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols, run_dir)
+        else:
+            assert False
+        pkl_save(f'{run_dir}/out.pkl', out)
+        pkl_save(f'{run_dir}/eval_res.pkl', eval_res)
+        print('Evaluation result:', eval_res)
 
-    with open(f'{run_dir}/eval_res.json', 'w') as json_file:
-        json.dump(eval_res, json_file, indent=4)
+        with open(f'{run_dir}/eval_res.json', 'w') as json_file:
+            json.dump(eval_res, json_file, indent=4)
 
     print("Finished.")
