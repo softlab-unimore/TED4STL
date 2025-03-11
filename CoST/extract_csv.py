@@ -26,10 +26,6 @@ def extract_data_from_file(file_path, data_type):
             if 'forecasting' in args.directory:
                 data = data['ours']
                 match = re.search(r'([^/]+)__forecast_multivar_', file_path).group(1)
-            elif 'classification' in args.directory:
-                match = re.search(r'([^/]+)__classification_', file_path).group(1)
-            elif 'anomaly_detection' in args.directory:
-                match = re.search(r'([^/]+)__anomaly_detection_', file_path).group(1)
             else:
                 raise ValueError(f"Unknown task type")
 
@@ -42,16 +38,6 @@ def extract_data_from_file(file_path, data_type):
                         'MAE': round(data[key][data_type]['MAE'], 4),
                         'MSE': round(data[key][data_type]['MSE'], 4)
                     }
-            elif 'classification' in args.directory:
-                extract_data[model_name][match] ={
-                    'acc': round(data['acc'], 4),
-                }
-            elif 'anomaly_detection' in args.directory:
-                extract_data[model_name][match] ={
-                    'f1': round(data['f1'], 4),
-                    'precision': round(data['precision'], 4),
-                    'recall': round(data['recall'], 4)
-                }
             else:
                 raise ValueError(f"Unknown task type")
             return extract_data
@@ -81,43 +67,6 @@ def extract_rows_forecasting(data_list):
     df['Dataset'] = df['Dataset'].where(df['Dataset'] != df['Dataset'].shift(), " ")
     return df
 
-def extract_rows_classification(data_list):
-    rows = []
-    for data in data_list:
-        for model_name, datasets in data.items():
-            for dataset_name, metrics in datasets.items():
-                rows.append({
-                    'Model': model_name,
-                    'Dataset': dataset_name,
-                    'acc': metrics['acc']
-                })
-
-    df = pd.DataFrame(rows).sort_values(by=['Model', 'Dataset'])
-    df = df.pivot_table(index=['Dataset'], columns='Model', values=['acc']).round(4)
-    df.columns = [f'{model}' for metrics, model in df.columns]
-    df = df.reindex(sorted(df.columns), axis=1)
-    df.reset_index(inplace=True)
-    df['Dataset'] = df['Dataset'].where(df['Dataset'] != df['Dataset'].shift(), " ")
-    return df
-
-def extract_rows_anomaly_detection(data_list):
-    rows = []
-    for data in data_list:
-        for model_name, datasets in data.items():
-            for dataset_name, metrics in datasets.items():
-                rows.append({
-                    'Model': model_name,
-                    'Dataset': dataset_name,
-                    'f1': metrics['f1'],
-                    'precision': metrics['precision'],
-                    'recall': metrics['recall']
-                })
-
-    df = pd.DataFrame(rows).sort_values(by=['Dataset', 'Model'])
-    df = df.pivot_table(index=['Model'], columns='Dataset', values=['f1', 'precision', 'recall']).round(4)
-    df.reset_index(inplace=True)
-    return df
-
 def main(directory, output_csv, type):
     """
     Extracts MAE e MSE from eval_res.json files and saves them in a CSV file.
@@ -128,10 +77,6 @@ def main(directory, output_csv, type):
 
     if 'forecasting' in args.directory:
         df = extract_rows_forecasting(data_list)
-    elif 'classification' in args.directory:
-        df = extract_rows_classification(data_list)
-    elif 'anomaly_detection' in args.directory:
-        df = extract_rows_anomaly_detection(data_list)
     else:
         raise ValueError(f"Unknown task type")
 
@@ -143,8 +88,5 @@ if __name__ == "__main__":
     parser.add_argument('--directory', type=str, help='Directory where the eval_res.json files are located')
     parser.add_argument('--type', type=str, default='norm', help='Choose if you want raw or norm data')
     args = parser.parse_args()
-    if args.type == 'norm':
-        output_csv = "results.csv"  # Cambia il nome del file CSV se necessario
-    else:
-        output_csv = "results_raw.csv"
+    output_csv = "rsults.csv" if args.type == 'norm' else "results_raw.csv"
     main(f'./training/{args.directory}', output_csv, args.type)
