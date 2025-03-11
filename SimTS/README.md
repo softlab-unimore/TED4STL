@@ -1,7 +1,7 @@
 # SimTS: Implementation with 1 - step pipeline
 
 <p align="center">
-    <img src="/images/simts.png" alt="simts" width=600>
+    <img src="./images/simts.png" alt="simts" width=600>
 </p>
 
 ## Dependencies
