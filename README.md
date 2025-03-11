@@ -22,6 +22,11 @@ The datasets are available at the following links:
 | Weather | [https://www.bgc-jena.mpg.de/wetter/+(https://www.bgc-jena.mpg.de/wetter/) |
 | Ili | [https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html](https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html) |
 
+All datasets are provided in .csv format, except for the **electricity** dataset, which requires a preprocessing step. To preprocess it, please navigate to the datasets directory of each model and run the following command:
+```sh
+python3 preprocess_electricity.py
+```
+
 ## Run models
 
 To run the models move to the root directory of each of them and follow the instructions reported in the ```README.md``` file.
