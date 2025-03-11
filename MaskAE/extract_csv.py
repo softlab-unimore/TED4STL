@@ -4,8 +4,6 @@ import json
 import pandas as pd
 from argparse import ArgumentParser
 
-from numpy.f2py.f2py2e import outmess
-
 
 def find_eval_res_files(start_path):
     """
