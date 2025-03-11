@@ -59,7 +59,8 @@ class PretrainDataset(TensorDataset):
                  sigma,
                  p=0.5,
                  multiplier=10,
-                 n_time_cols=7):
+                 n_time_cols=7,
+                 kernel_size=25):
         self.data = data
         self.p = p
         self.sigma = sigma
@@ -68,8 +69,8 @@ class PretrainDataset(TensorDataset):
         self.n_time_cols = n_time_cols
         self.data1 = self.transform(self.data)
         self.data2 = self.transform(self.data)
-        self.dataset1 = TimeSeriesDatasetWithMovingAvg(self.data1, n_time_cols=self.n_time_cols)
-        self.dataset2 = TimeSeriesDatasetWithMovingAvg(self.data2, n_time_cols=self.n_time_cols)
+        self.dataset1 = TimeSeriesDatasetWithMovingAvg(self.data1, n_time_cols=self.n_time_cols, kernel_size=kernel_size)
+        self.dataset2 = TimeSeriesDatasetWithMovingAvg(self.data2, n_time_cols=self.n_time_cols, kernel_size=kernel_size)
         super().__init__(self.dataset1.tensors[0], self.dataset2.tensors[0])
 
     def __getitem__(self, item):
@@ -257,7 +258,8 @@ class CoSTDlinear:
                  batch_size: int = 16,
                  after_iter_callback: Union[Callable, None] = None,
                  after_epoch_callback: Union[Callable, None] = None,
-                 n_time_cols=7):
+                 n_time_cols=7,
+                 kernel_size=25):
 
         super().__init__()
         self.input_dims = input_dims
@@ -268,6 +270,7 @@ class CoSTDlinear:
         self.batch_size = batch_size
         self.max_train_length = max_train_length
         self.n_time_cols = n_time_cols
+        self.kernel_size = kernel_size
 
         if kernels is None:
             kernels = []
@@ -313,7 +316,7 @@ class CoSTDlinear:
         train_data = train_data[~np.isnan(train_data).all(axis=2).all(axis=1)]
 
         multiplier = 1 if train_data.shape[0] >= self.batch_size else math.ceil(self.batch_size / train_data.shape[0])
-        train_dataset = PretrainDataset(torch.from_numpy(train_data).to(torch.float), sigma=0.5, multiplier=multiplier, n_time_cols=self.n_time_cols)
+        train_dataset = PretrainDataset(torch.from_numpy(train_data).to(torch.float), sigma=0.5, multiplier=multiplier, n_time_cols=self.n_time_cols, kernel_size=self.kernel_size)
         # train_loader = DataLoader(train_dataset, batch_size=min(self.batch_size, len(train_dataset)), shuffle=True, drop_last=True)
         train_loader = create_custom_dataLoader(train_dataset, self.batch_size, n_time_cols=self.n_time_cols)
 
@@ -411,7 +414,7 @@ class CoSTDlinear:
         org_training = self.net.training
         self.net.eval()
         
-        dataset = TimeSeriesDatasetWithMovingAvg(torch.from_numpy(data).to(torch.float), n_time_cols=self.n_time_cols)
+        dataset = TimeSeriesDatasetWithMovingAvg(torch.from_numpy(data).to(torch.float), n_time_cols=self.n_time_cols, kernel_size=self.kernel_size)
         # loader = DataLoader(dataset, batch_size=batch_size)
         loader = create_custom_dataLoader(dataset, batch_size, n_time_cols=self.n_time_cols, eval=True)
 
