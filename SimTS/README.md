@@ -1,7 +1,7 @@
 # SimTS: Implementation with 1 - step pipeline
 
 <p align="center">
-    <img src="/images/simts.png" alt="simts" width=600>
+    <img src="./images/simts.png" alt="simts" width=600>
 </p>
 
 ## Dependencies
@@ -19,9 +19,3 @@ sh forecasting.sh
 ```
 After training and evaluation, the trained encoder, output and evaluation metrics can be found in `training/forecasting/B{batch_size}_E{output_repr_dim}/<mode>/DatasetName__RunName_Date_Time/`.
 
-To run the experiments on classification task use the following command:
-
-```shell
-sh classification.sh
-```
-After training and evaluation, the trained encoder, output and evaluation metrics can be found in `training/classfication/B{batch_size}_E{output_repr_dim}/<mode>/DatasetName__RunName_Date_Time/`.
