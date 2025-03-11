@@ -40,21 +40,9 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=None, help='The random seed')
     parser.add_argument('--max-threads', type=int, default=None, help='The maximum allowed number of threads used by this process')
     parser.add_argument('--eval', action="store_true", help='Whether to perform evaluation after training')
-
+    parser.add_argument('--short_term', action="store_true", help='Whether to perform short term forecasting')
     parser.add_argument('--kernels', type=int, nargs='+', default=[1, 2, 4, 8, 16, 32, 64, 128], help='The kernel sizes used in the mixture of AR expert layers')
     parser.add_argument('--alpha', type=float, default=0.0005, help='Weighting hyperparameter for loss function')
-
-    # args = parser.parse_args(['--dataset', 'ETTh1',
-    #                           '--run_name', 'forecast_multivar',
-    #                           '--alpha', '0.0005',
-    #                           '--kernels', '1', '2', '4', '8', '16', '32', '64', '128',
-    #                           '--max-train-length', '201',
-    #                           '--batch-size', '128',
-    #                           '--archive', 'forecast_csv',
-    #                           '--repr-dims', '320',
-    #                           '--max-threads', '8',
-    #                           '--seed', '4',
-    #                           '--eval'])
 
     args = parser.parse_args()
 
@@ -65,19 +53,11 @@ if __name__ == '__main__':
 
     if args.archive == 'forecast_csv':
         task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(args.dataset)
+        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(args.dataset, short_term=args.short_term)
         train_data = data[:, train_slice]
     elif args.archive == 'forecast_csv_univar':
         task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(args.dataset, univar=True)
-        train_data = data[:, train_slice]
-    elif args.archive == 'forecast_npy':
-        task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_npy(args.dataset)
-        train_data = data[:, train_slice]
-    elif args.archive == 'forecast_npy_univar':
-        task_type = 'forecasting'
-        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_npy(args.dataset, univar=True)
+        data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_time_cols = datautils.load_forecast_csv(args.dataset, short_term=args.short_term, univar=True)
         train_data = data[:, train_slice]
     else:
         raise ValueError(f"Archive type {args.archive} is not supported.")
