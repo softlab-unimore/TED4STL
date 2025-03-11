@@ -1,7 +1,7 @@
 # TS2Vec: implementation with 1 - step pipeline
 
 <p align="center">
-  <img src="/images/ts2vec.png" alt="ts2vec" width="600" />
+  <img src="./images/ts2vec.png" alt="ts2vec" width="600" />
 </p> 
 
 ## Requirements
