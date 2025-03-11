@@ -3,22 +3,6 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 
-def load_forecast_npy(name, univar=False):
-    data = np.load(f'datasets/{name}.npy')    
-    if univar:
-        data = data[: -1:]
-        
-    train_slice = slice(None, int(0.6 * len(data)))
-    valid_slice = slice(int(0.6 * len(data)), int(0.8 * len(data)))
-    test_slice = slice(int(0.8 * len(data)), None)
-    
-    scaler = StandardScaler().fit(data[train_slice])
-    data = scaler.transform(data)
-    data = np.expand_dims(data, 0)
-
-    pred_lens = [24, 48, 96, 288, 672]
-    return data, train_slice, valid_slice, test_slice, scaler, pred_lens, 0
-
 def _get_time_features(dt):
     return np.stack([
         dt.minute.to_numpy(),
@@ -30,7 +14,7 @@ def _get_time_features(dt):
         dt.isocalendar().week.to_numpy(),
     ], axis=1).astype(float)
 
-def load_forecast_csv(name, univar=False):
+def load_forecast_csv(name, short_term, univar=False):
     data = pd.read_csv(f'datasets/{name}.csv', index_col='date', parse_dates=True)
     dt_embed = _get_time_features(data.index)
     n_covariate_cols = dt_embed.shape[-1]
@@ -83,5 +67,8 @@ def load_forecast_csv(name, univar=False):
         pred_lens = [24, 36, 48, 60]
     else:
         pred_lens = [24, 48, 96, 288, 672]
-        
+
+    if short_term:
+        pred_lens = [6, 8, 10, 12, 14, 16, 18, 20, 22]
+
     return data, train_slice, valid_slice, test_slice, scaler, pred_lens, n_covariate_cols
