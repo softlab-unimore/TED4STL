@@ -7,11 +7,11 @@ from datetime import datetime
 import torch.nn
 from tqdm import tqdm
 import random
-from model import *
+from model.model import *
 from datautils import load_forecast_csv
 from finetune_train_tensor_dataset import TimeSeriesDatasetWithMovingAvg_Finetune
 
-from model_dlinear import MAE_ViT_Dlinear, ViT_Forecasting
+from model.model_dlinear import MAE_ViT_Dlinear, ViT_Forecasting
 
 import warnings
 warnings.filterwarnings("ignore")

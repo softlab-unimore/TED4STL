@@ -5,7 +5,7 @@ import math
 import time
 
 from tqdm import tqdm
-from model import *
+from model.model import *
 
 from datautils import load_forecast_csv
 from save_model import save_model
