@@ -315,28 +315,6 @@ class SimTSDlinear:
 
                 loss = self.loss(encode_future_embeds, fcst_future_embeds)
 
-                # if self.task_type == 'classification':
-                #     z2_avg, _, z1_avg = self.net_avg(x2_avg, x1_avg, mask=None)
-                #     z2_err, _, z1_err = self.net_err(x2_err, x1_err, mask=None)
-                #     z1 = z1_avg + z1_err
-                #     z2 = z2_avg + z2_err
-                #
-                #     if z1.shape[1] - 1 > 127:
-                #         rand_idx = random.randint(127, z2.shape[1] - 1)
-                #     else:
-                #         rand_idx = z2.shape[1] - 1
-                #     trend2 = z2[:, rand_idx, :]
-                #     # print(rand_idx)
-                #
-                #     # TODO
-                #     # encode_past_embeds = z1.to(self.device)  # no-gradient
-                #     encode_past_embeds = z1  # no-gradient
-                #     fcst_past_embeds = self.predictor(trend2.unsqueeze(-1))
-                #
-                #     loss2 = self.loss(encode_past_embeds, fcst_past_embeds)
-                #
-                #     loss = loss + loss2
-
                 loss.backward()
                 optimizer.step()
                 # self.net_avg.update_parameters(self._net)
