@@ -24,7 +24,7 @@ The datasets are available at the following links:
 
 ## Run models
 
-To run the models follow the instructions reported in the ```README.md``` file available in every model directory.
+To run the models move to the root directory of each of them and follow the instructions reported in the ```README.md``` available.
 
 ## Statistics
 
