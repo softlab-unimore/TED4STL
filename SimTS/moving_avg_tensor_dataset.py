@@ -16,8 +16,12 @@ class MovingAvg(nn.Module):
 
     def forward(self, x):
         # padding on the both ends of time series
-        front = x[:, 0:1, :].repeat(1, (self.kernel_size - 1) // 2, 1)
-        end = x[:, -1:, :].repeat(1, (self.kernel_size - 1) // 2, 1)
+        pad_total = self.kernel_size - 1
+        pad_left = pad_total // 2
+        pad_right = pad_total - pad_left
+        # Applica il padding
+        front = x[:, 0:1, :].repeat(1, pad_left, 1)
+        end = x[:, -1:, :].repeat(1, pad_right, 1)
         x = torch.cat([front, x, end], dim=1)
         x = self.avg(x.permute(0, 2, 1))
         x = x.permute(0, 2, 1)
@@ -26,7 +30,7 @@ class MovingAvg(nn.Module):
 
 class TimeSeriesDatasetWithMovingAvg(TensorDataset):
 
-    def __init__(self, original_dataset: Tensor, n_time_cols, kernel_size=9):
+    def __init__(self, original_dataset: Tensor, n_time_cols, kernel_size=25):
         self.n_time_cols = n_time_cols
         self.moving_avg = MovingAvg(kernel_size, stride=1)
         x_time = original_dataset[:, :, :self.n_time_cols]

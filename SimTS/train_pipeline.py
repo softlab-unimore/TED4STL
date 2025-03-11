@@ -63,6 +63,7 @@ if __name__ == '__main__':
     parser.add_argument('--mix', action="store_true", help='Whether to perform mix')
     parser.add_argument('--short_term', action="store_true", help='Whether to perform short term forecasting')
     parser.add_argument('--eval', action="store_true", help='Whether to perform evaluation after training')
+    parser.add_argument('--kernel_size', default=25, type=int, help='The kernel size used in the moving average')
     args = parser.parse_args()
 
     print("Dataset:", args.dataset)
@@ -104,7 +105,8 @@ if __name__ == '__main__':
         experiment=args.experiment,
         experiment_args={'sigma': 0.5},
         mix=args.mix,
-        task_type=task_type
+        task_type=task_type,
+        kernel_size=args.kernel_size
     )
 
     if args.save_every is not None:

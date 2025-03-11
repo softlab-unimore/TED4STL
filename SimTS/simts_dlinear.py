@@ -134,7 +134,8 @@ class SimTSDlinear:
             after_epoch_callback=None,
             mix=False,
             n_time_cols=7,
-            task_type='forecasting'
+            task_type='forecasting',
+            kernel_size=25
     ):
         ''' Initialize a SimTS model.
 
@@ -178,9 +179,7 @@ class SimTSDlinear:
 
         self.mix = mix
         self.task_type = task_type
-
-        if self.task_type == 'classification' and self.raw_length < self.max_train_length:
-            self.K = self.raw_length // 2
+        self.kernel_size = kernel_size
 
         if self.raw_length %2 != 0:
             self.raw_length -= 1
@@ -245,7 +244,7 @@ class SimTSDlinear:
         # train_dataset = TensorDataset(torch.from_numpy(train_data).to(torch.float))
         # train_loader = DataLoader(train_dataset, batch_size=min(self.batch_size, len(train_dataset)), shuffle=True,
                                   # drop_last=True)
-        train_dataset = TimeSeriesDatasetWithMovingAvg(torch.from_numpy(train_data).to(torch.float), n_time_cols=self.n_time_cols)
+        train_dataset = TimeSeriesDatasetWithMovingAvg(torch.from_numpy(train_data).to(torch.float), n_time_cols=self.n_time_cols, kernel_size=self.kernel_size)
         train_loader = create_custom_dataLoader(train_dataset, self.batch_size, n_time_cols=self.n_time_cols)
 
 
@@ -404,7 +403,7 @@ class SimTSDlinear:
         # dataset = TensorDataset(torch.from_numpy(data.astype(np.float32)))
         # loader = DataLoader(dataset, batch_size=batch_size)
 
-        dataset = TimeSeriesDatasetWithMovingAvg(torch.from_numpy(data).to(torch.float), self.n_time_cols)
+        dataset = TimeSeriesDatasetWithMovingAvg(torch.from_numpy(data).to(torch.float), self.n_time_cols, kernel_size=self.kernel_size)
         loader = create_custom_dataLoader(dataset, batch_size, n_time_cols=self.n_time_cols, eval=True)
 
         with torch.no_grad():
