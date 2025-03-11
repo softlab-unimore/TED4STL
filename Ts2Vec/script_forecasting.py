@@ -39,6 +39,7 @@ if __name__ == "__main__":
     config.add_argument('--irregular', type=float, default=0, help='The ratio of missing observations (defaults to 0)')
     config.add_argument('--ci', action='store_true', default=False)
     config.add_argument('--short-term', action='store_true', default=False)
+    config.add_argument('--kernel_size', default=25, type=int)
     args = config.parse_args()
 
     # set GPU
@@ -90,7 +91,8 @@ if __name__ == "__main__":
             lr=args.lr,
             output_dims=args.repr_dims,
             max_train_length=args.max_train_length,
-            ci=args.ci
+            ci=args.ci,
+            kernel_size=args.kernel_size
         )
 
         # Train a TS2Vec model
