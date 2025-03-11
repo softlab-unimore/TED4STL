@@ -1,4 +1,4 @@
-# MAE: Implementation with 2 - step pipeline
+# MaskAE: Implementation with 2 - step pipeline
 
 <p align="center">
     <img src="./images/maskae.png" alt="mae" width=600>
