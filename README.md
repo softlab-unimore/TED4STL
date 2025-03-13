@@ -29,6 +29,7 @@ python3 preprocess_electricity.py
 
 ## Run models
 
+All the models require Python 3.11 and each has its requirements reported in the `requirements.txt` file. Please install them before running the models.
 To run the models move to the root directory of each of them and follow the instructions reported in the ```README.md``` file.
 
 ## Statistics
