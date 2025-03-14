@@ -13,14 +13,15 @@ pip install -r requirements.txt
 
 ## Usage
 
-To train and evaluate TS2Vec on a dataset for forecasting task, run the following command:
+To train and evaluate TS2Vec on a dataset for forecasting tasks, run the following command:
 
 ```sh
 sh forecasting.sh
 ```
 
-After training and evaluation, the trained encoder, output and evaluation metrics can be found in `training/forecasting/B{batch_size}_E{output_repr_dim}/<mode>/DatasetName__RunName_Date_Time/`.
+To run the short-term forecasting please add the `--short_term` parameter in each command reported inside the `forecasting.sh` file.
 
-To train and evaluate TS2Vec on a dataset for classfication task, run the following command:
+After training and evaluation, the trained encoder, output, and evaluation metrics can be found in `training/forecasting/B{batch_size}_E{output_repr_dim}/<mode>/DatasetName__RunName_Date_Time/`.
+
 
 
