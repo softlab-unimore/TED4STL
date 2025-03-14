@@ -2,8 +2,8 @@
 python3 script_forecasting_dlinear.py --dataset ETTh1 --mode dlinear
 python3 finetune_script_forecasting_dlinear.py --dataset ETTh1 --mode dlinear
 
-python3 script_forecasting_dlinear.py --dataset ETTh1 --mode dlinear
-python3 finetune_script_forecasting_dlinear.py --dataset ETTh1 --mode dlinear
+python3 script_forecasting_dlinear.py --dataset ETTh2 --mode dlinear
+python3 finetune_script_forecasting_dlinear.py --dataset ETTh2 --mode dlinear
 
 python3 script_forecasting_dlinear.py --dataset ETTm1 --mode dlinear
 python3 finetune_script_forecasting_dlinear.py --dataset ETTm1 --mode dlinear
