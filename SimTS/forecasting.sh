@@ -12,14 +12,14 @@ python3 train_pipeline.py --dataset traffic --eval
 python3 train_pipeline.py --dataset national_illness --eval
 
 # To run original SimTS model on forecasting task
-python3 train_simts.py --dataset ETTh1 --eval
-python3 train_simts.py --dataset ETTh2 --eval
-python3 train_simts.py --dataset ETTm1 --eval
-python3 train_simts.py --dataset ETTm2 --eval
-python3 train_simts.py --dataset exchange_rate --eval
-python3 train_simts.py --dataset WTH --eval
-python3 train_simts.py --dataset electricity --eval
-python3 train_simts.py --dataset weather --eval
-python3 train_simts.py --dataset traffic --eval
-python3 train_simts.py --dataset national_illness --eval
+python3 train.py --dataset ETTh1 --eval
+python3 train.py --dataset ETTh2 --eval
+python3 train.py --dataset ETTm1 --eval
+python3 train.py --dataset ETTm2 --eval
+python3 train.py --dataset exchange_rate --eval
+python3 train.py --dataset WTH --eval
+python3 train.py --dataset electricity --eval
+python3 train.py --dataset weather --eval
+python3 train.py --dataset traffic --eval
+python3 train.py --dataset national_illness --eval
 

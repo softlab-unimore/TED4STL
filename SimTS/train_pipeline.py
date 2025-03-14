@@ -62,7 +62,6 @@ if __name__ == '__main__':
     parser.add_argument('--area', type=int, default=None, help='Type of experiment to perform (defaluts to base)')
     parser.add_argument('--mix', action="store_true", help='Whether to perform mix')
     parser.add_argument('--short_term', action="store_true", help='Whether to perform short term forecasting')
-    parser.add_argument('--eval', action="store_true", help='Whether to perform evaluation after training')
     parser.add_argument('--kernel_size', default=25, type=int, help='The kernel size used in the moving average')
     args = parser.parse_args()
 
