@@ -1,9 +1,7 @@
-Bottleneck
-torch==1.8.1
-scipy==1.6.1
-numpy==1.24.4
-statsmodels==0.12.2
-pandas
-scikit_learn==0.24.2
-matplotlib
-sktime
+Bottleneck==1.4.0
+torch==2.1.1
+scipy==1.11.1
+numpy==1.26.4
+pandas==2.2.2
+scikit_learn==1.2.0
+sktime==0.30.2

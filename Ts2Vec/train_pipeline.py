@@ -16,31 +16,31 @@ from ts2vec_dlinear import TS2VecDlinear
 
 def create_model(type_of_train, dim, n_time_cols, current_device, configuration):
     if 'ts2vec-dlinear' in type_of_train.lower():
-        return TS2VecDlinear(input_dims=dim, device=current_device, mode=type_of_train, n_time_cols=n_time_cols, **configuration)
+        return
     return TS2Vec(input_dims=dim, device=current_device, mode=type_of_train, n_time_cols=n_time_cols, **configuration)
 
 if __name__ == "__main__":
-    config = argparse.ArgumentParser()
-    config.add_argument('--dataset', type=str, default='ETTh1', help='The dataset name')
-    config.add_argument('--run_name', help='The folder name used to save model, output and evaluation metrics. This can be set to any word')
-    config.add_argument('--mode', type=str, default='ts2vec-Dlinear-one-loss')
-    config.add_argument('--loader', type=str, required=True, help='The data loader used to load the experimental data. This can be set to UCR, UEA, forecast_csv, forecast_csv_univar, anomaly, or anomaly_coldstart')
-    config.add_argument('--gpu', type=int, default=0, help='The gpu no. used for training and inference (defaults to 0)')
-    config.add_argument('--batch-size', type=int, default=8, help='The batch size (defaults to 8)')
-    config.add_argument('--lr', type=float, default=0.001, help='The learning rate (defaults to 0.001)')
-    config.add_argument('--repr-dims', type=int, default=320, help='The representation dimension (defaults to 320)')
-    config.add_argument('--max-train-length', type=int, default=3000, help='For sequence with a length greater than <max_train_length>, it would be cropped into some sequences, each of which has a length less than <max_train_length> (defaults to 3000)')
-    config.add_argument('--iters', type=int, default=None, help='The number of iterations')
-    config.add_argument('--epochs', type=int, default=None, help='The number of epochs')
-    config.add_argument('--save-every', type=int, default=None, help='Save the checkpoint every <save_every> iterations/epochs')
-    config.add_argument('--seed', type=int, default=None, help='The random seed')
-    config.add_argument('--max-threads', type=int, default=None, help='The maximum allowed number of threads used by this process')
-    config.add_argument('--eval', action="store_true", help='Whether to perform evaluation after training')
-    config.add_argument('--irregular', type=float, default=0, help='The ratio of missing observations (defaults to 0)')
-    config.add_argument('--ci', action='store_true', default=False)
-    config.add_argument('--short-term', action='store_true', default=False)
-    config.add_argument('--kernel_size', default=25, type=int)
-    args = config.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, default='ETTh1', help='The dataset name')
+    parser.add_argument('--run_name', help='The folder name used to save model, output and evaluation metrics. This can be set to any word')
+    parser.add_argument('--mode', type=str, default='ts2vec-Dlinear-one-loss')
+    parser.add_argument('--loader', type=str, required=True, help='The data loader used to load the experimental data. This can be set to UCR, UEA, forecast_csv, forecast_csv_univar, anomaly, or anomaly_coldstart')
+    parser.add_argument('--gpu', type=int, default=0, help='The gpu no. used for training and inference (defaults to 0)')
+    parser.add_argument('--batch-size', type=int, default=8, help='The batch size (defaults to 8)')
+    parser.add_argument('--lr', type=float, default=0.001, help='The learning rate (defaults to 0.001)')
+    parser.add_argument('--repr-dims', type=int, default=320, help='The representation dimension (defaults to 320)')
+    parser.add_argument('--max-train-length', type=int, default=3000, help='For sequence with a length greater than <max_train_length>, it would be cropped into some sequences, each of which has a length less than <max_train_length> (defaults to 3000)')
+    parser.add_argument('--iters', type=int, default=None, help='The number of iterations')
+    parser.add_argument('--epochs', type=int, default=None, help='The number of epochs')
+    parser.add_argument('--save-every', type=int, default=None, help='Save the checkpoint every <save_every> iterations/epochs')
+    parser.add_argument('--seed', type=int, default=None, help='The random seed')
+    parser.add_argument('--max-threads', type=int, default=None, help='The maximum allowed number of threads used by this process')
+    parser.add_argument('--eval', action="store_true", help='Whether to perform evaluation after training')
+    parser.add_argument('--irregular', type=float, default=0, help='The ratio of missing observations (defaults to 0)')
+    parser.add_argument('--ci', action='store_true', default=False)
+    parser.add_argument('--short-term', action='store_true', default=False)
+    parser.add_argument('--kernel_size', default=25, type=int)
+    args = parser.parse_args()
 
     # set GPU
     device = utils.init_dl_program(0, seed=42, max_threads=8)
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     print(train_data.shape)
 
     #Creation of dirs to store results
-    run_dir = f'{args.path}/training/forecasting/{args.mode}/{args.dataset}__ {utils.name_with_datetime("forecast_multivar")}'
+    run_dir = f'./training/forecasting/{args.mode}/{args.dataset}__ {utils.name_with_datetime("forecast_multivar")}'
     os.makedirs(run_dir, exist_ok=True)
 
 
@@ -96,7 +96,7 @@ if __name__ == "__main__":
         )
 
         # Train a TS2Vec model
-        model = create_model(args.mode, input_dim, n_time_cols, device, config)
+        model = TS2VecDlinear(input_dims=input_dim, device=device, mode=args.mode, n_time_cols=n_time_cols, **config)
         # model = TS2VecAblation(input_dims=input_dim, device=device, mode='ts2vec-ablation-err', n_time_cols=n_time_cols, **config)
     else:
         config = dict(
@@ -109,7 +109,8 @@ if __name__ == "__main__":
         )
 
         # Train a TS2Vec model
-        model = create_model(args.mode, 1, n_time_cols, device, config)
+        # model = create_model(args.mode, 1, n_time_cols, device, config)
+        model = TS2VecDlinear(input_dims=1, device=device, mode=args.mode, n_time_cols=n_time_cols, **config)
 
     t = time.time()
 

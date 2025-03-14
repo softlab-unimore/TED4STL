@@ -2,6 +2,8 @@ import argparse
 import os
 import time
 import datetime
+
+import utils
 from ts2vec import TS2Vec
 import tasks
 import datautils
@@ -20,8 +22,9 @@ def save_checkpoint_callback(
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('dataset', help='The dataset name')
-    parser.add_argument('run_name', help='The folder name used to save model, output and evaluation metrics. This can be set to any word')
+    parser.add_argument('--dataset', help='The dataset name')
+    parser.add_argument('--mode', type=str, default='ts2vec')
+    parser.add_argument('--run_name', help='The folder name used to save model, output and evaluation metrics. This can be set to any word')
     parser.add_argument('--loader', type=str, required=True, help='The data loader used to load the experimental data. This can be set to UCR, UEA, forecast_csv, forecast_csv_univar, anomaly, or anomaly_coldstart')
     parser.add_argument('--gpu', type=int, default=0, help='The gpu no. used for training and inference (defaults to 0)')
     parser.add_argument('--batch-size', type=int, default=8, help='The batch size (defaults to 8)')
@@ -67,7 +70,7 @@ if __name__ == '__main__':
         unit = 'epoch' if args.epochs is not None else 'iter'
         config[f'after_{unit}_callback'] = save_checkpoint_callback(args.save_every, unit)
 
-    run_dir = 'training/' + args.dataset + '__' + name_with_datetime(args.run_name)
+    run_dir = f'./training/forecasting/{args.mode}/{args.dataset}__ {utils.name_with_datetime("forecast_multivar")}'
     os.makedirs(run_dir, exist_ok=True)
     
     t = time.time()
