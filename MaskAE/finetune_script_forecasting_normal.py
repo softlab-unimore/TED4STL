@@ -11,7 +11,7 @@ import random
 from datautils import load_forecast_csv
 from finetune_train_tensor_dataset import TimeSeriesDataset_Finetune
 
-from model.model import MAE_ViT, ViT_Forecasting
+from models.model import MAE_ViT, ViT_Forecasting
 
 import warnings
 warnings.filterwarnings("ignore")

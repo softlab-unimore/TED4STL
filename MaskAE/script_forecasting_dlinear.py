@@ -5,11 +5,11 @@ import time
 import datetime
 
 from tqdm import tqdm
-from model.model import *
+from models.model import *
 from datautils import load_forecast_csv
 from save_model import save_model
 from moving_avg_tensor_dataset import TimeSeriesDatasetWithMovingAvg
-from model.model_dlinear import MAE_ViT_Dlinear
+from models.model_dlinear import MAE_ViT_Dlinear
 import random
 
 def setup_seed(seed=42):
