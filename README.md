@@ -29,7 +29,8 @@ python3 preprocess_electricity.py
 
 ## Run models
 
-All the models require Python 3.11 and each has its requirements reported in the `requirements.txt` file. Please install them in a `.venv` environment before running the models.
+All the models require Python 3.11 and each has its requirements reported in the `requirements.txt` file in the model root directory. 
+Please create a `.venv` environment for each model and install the requirements before running. 
 To run the models move to the root directory of each of them and follow the instructions reported in the ```README.md``` file.
 
 ## Statistics
