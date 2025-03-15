@@ -1,4 +1,4 @@
-# TED4STL: Trend-Error Decomposition For Self-Supervised Time Series Learning for Multivariate Forecasting Task
+# TED4STL: Trend-Error Decomposition For Self-Supervised Time Series Learning in Multivariate Forecasting Task
 
 <p align="center">
 <img src=".\images\1_pipeline_step_1.png" width = "600" alt="" align=center />
