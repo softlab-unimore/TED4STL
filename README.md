@@ -19,7 +19,7 @@ The datasets are available at the following links:
 | WTH | [https://drive.google.com/drive/folders/1ohGYWWohJlOlb2gsGTeEq3Wii2egnEPR](https://drive.google.com/drive/folders/1ohGYWWohJlOlb2gsGTeEq3Wii2egnEPR) |
 | Electricity | [https://archive.ics.uci.edu/ml/datasets/ElectricityLoadDiagrams20112014](https://archive.ics.uci.edu/ml/datasets/ElectricityLoadDiagrams20112014) |
 | Traffic | [http://pems.dot.ca.gov/](http://pems.dot.ca.gov/) |
-| Weather | [https://www.bgc-jena.mpg.de/wetter/+(https://www.bgc-jena.mpg.de/wetter/) |
+| Weather | [https://www.bgc-jena.mpg.de/wetter/](https://www.bgc-jena.mpg.de/wetter/) |
 | Ili | [https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html](https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html) |
 
 All datasets are provided in .csv format, except for the **electricity** dataset, which requires a preprocessing step. To preprocess it, please navigate to the datasets directory of each model and run the following command:
