@@ -40,3 +40,20 @@ To extract the statistics of the models, move to their root directory and run th
 ```sh
 python3 exctract_csv.py --directory forecasting/B<batch_size>_E<repr_dim>/ [--type raw]
 ```
+
+## Citation
+
+```
+@article{DBLP:journals/access/PederzoliBVG26,
+  author       = {Sara Pederzoli and
+                  Francesco Del Buono and
+                  Maurizio Vincini and
+                  Francesco Guerra},
+  title        = {Trend-Error Decomposition for Self-Supervised Time Series Learning
+                  in Multivariate Forecasting Task},
+  journal      = {{IEEE} Access},
+  volume       = {14},
+  pages        = {8618--8631},
+  year         = {2026}
+}
+```
